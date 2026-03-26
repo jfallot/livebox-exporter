@@ -217,10 +217,6 @@ func main() {
 		writeHeaderVec,
 	)
 
-	// Unregister Go and Process collectors as they are not primarly needed
-	registry.Unregister(collectors.NewGoCollector())
-	registry.Unregister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
-
 	go func() {
 		for {
 			if err := pollers.Poll(ctx); err != nil {
@@ -240,13 +236,6 @@ func main() {
 			registry, promhttp.HandlerFor(registry, promhttp.HandlerOpts{}),
 		)),
 	)
-
-	// Exporter with gometrics only
-	promReg := prometheus.NewRegistry()
-	promReg.Register(collectors.NewGoCollector())
-	promReg.Register(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
-	http.Handle("/gometrics", promhttp.HandlerFor(promReg, promhttp.HandlerOpts{}))
-
 	http.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(indexPage))
 	})
